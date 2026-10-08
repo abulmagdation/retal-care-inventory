@@ -25,14 +25,14 @@ const daysLeft = (date) => Math.ceil((new Date(date).setHours(23, 59, 59) - Date
 const imageSrc = (image) => image.previewUrl || `${import.meta.env.VITE_API_URL || '/api'}/devices/images/${image.fileId}`;
 
 const statusMap = {
-  available: { label: 'متاح', color: 'success', bg: '#E0F4E9', fg: '#17683C' },
-  rented: { label: 'مؤجّر', color: 'secondary', bg: '#EAE9FF', fg: '#4B4BB2' },
-  maintenance: { label: 'صيانة', color: 'warning', bg: '#FFF0D2', fg: '#845000' },
-  reserved: { label: 'محجوز', color: 'info', bg: '#DDEEFE', fg: '#195B8D' },
-  active: { label: 'نشط', color: 'success', bg: '#E0F4E9', fg: '#17683C' },
-  completed: { label: 'تم الإرجاع', color: 'default', bg: '#EEF1F0', fg: '#53605C' },
-  overdue: { label: 'متأخر', color: 'error', bg: '#FFE2DE', fg: '#A21A18' },
-  cancelled: { label: 'ملغي', color: 'default', bg: '#EEF1F0', fg: '#53605C' },
+  available: { label: 'متاح', color: 'success', bg: '#E1F3EA', fg: '#286C55' },
+  rented: { label: 'مؤجّر', color: 'secondary', bg: '#E4EFED', fg: '#345B54' },
+  maintenance: { label: 'صيانة', color: 'warning', bg: '#FFF2D7', fg: '#946915' },
+  reserved: { label: 'محجوز', color: 'info', bg: '#E8EDEA', fg: '#547068' },
+  active: { label: 'نشط', color: 'success', bg: '#E1F3EA', fg: '#286C55' },
+  completed: { label: 'تم الإرجاع', color: 'default', bg: '#EDF3F1', fg: '#607670' },
+  overdue: { label: 'متأخر', color: 'error', bg: '#FBE8E3', fg: '#A34338' },
+  cancelled: { label: 'ملغي', color: 'default', bg: '#EDF3F1', fg: '#607670' },
 };
 const roles = { admin: 'مدير النظام', storekeeper: 'مسؤول مخزن', viewer: 'مشاهدة فقط' };
 const movementTypes = {
@@ -115,30 +115,33 @@ function Shell({ user, onLogout }) {
   }, [location.pathname]);
   const visibleNavItems = user.role === 'admin' ? navItems : navItems.filter((item) => item.path !== '/users');
   const current = location.pathname === '/logs' ? { label: 'سجل التدقيق' } : location.pathname.startsWith('/devices/') ? { label: 'تفاصيل الجهاز' } : visibleNavItems.find((n) => n.path === location.pathname) || visibleNavItems[0];
-  const drawer = <Box sx={{ height: '100%', bgcolor: '#EFF3FC', p: 2.2, display: 'flex', flexDirection: 'column' }}>
-    <Box px={1} py={1.4} mb={3}><Brand /></Box>
-    <Typography variant="caption" fontWeight={700} color="text.secondary" px={1.5} mb={1}>مساحة العمل</Typography>
-    <Stack spacing={.65}>{visibleNavItems.map((item) => {
+  const drawer = <Box className="drawer-shell">
+    <Box className="drawer-brand"><Brand light /></Box>
+    <Box className="drawer-profile"><Avatar className="drawer-avatar">{user.name?.slice(0, 1)}</Avatar><Box minWidth={0}><Typography fontWeight={800} fontSize={16} noWrap>{user.name}</Typography><Typography fontSize={11.5} className="drawer-muted">{roles[user.role]}</Typography></Box></Box>
+    <Typography className="drawer-section-label">القائمة الرئيسية</Typography>
+    <Stack gap={.7}>{visibleNavItems.map((item) => {
       const active = location.pathname === item.path; const Icon = item.icon;
-      return <Button className={`nav-button ${active ? 'active' : ''}`} key={item.path} onClick={() => { navigate(item.path); setMobileOpen(false); }} sx={{ justifyContent: 'flex-start', color: active ? 'primary.dark' : 'text.secondary', bgcolor: active ? '#DBE7FF' : 'transparent', px: 1.1, py: .7, '&:hover': { bgcolor: active ? '#DBE7FF' : '#E3EBFB' } }}><Box className="nav-icon"><Icon fontSize="small" /></Box><Box component="span" sx={{ fontWeight: active ? 800 : 650 }}>{item.label}</Box>{item.path === '/alerts' && alertCount > 0 && <Box component="span" sx={{ marginInlineStart: 'auto', bgcolor: '#C13232', color: '#fff', borderRadius: 8, minWidth: 22, px: .7, fontSize: 11 }}>{arNumber.format(alertCount)}</Box>}{active && item.path !== '/alerts' && <Box className="nav-indicator" />}</Button>;
+      return <Button className={`nav-button ${active ? 'active' : ''}`} key={item.path} onClick={() => { navigate(item.path); setMobileOpen(false); }} sx={{ justifyContent: 'flex-start', px: 1.3, py: .7 }}><Box className="nav-icon"><Icon fontSize="small" /></Box><Box component="span" sx={{ fontWeight: active ? 800 : 600 }}>{item.label}</Box>{item.path === '/alerts' && alertCount > 0 && <Box component="span" className="nav-count">{arNumber.format(alertCount)}</Box>}</Button>;
     })}</Stack>
-    <Box sx={{ mt: 'auto' }}>
-      <Card sx={{ bgcolor: '#E1EAFB', boxShadow: 'none', border: 0, mb: 1.5 }}><CardContent sx={{ p: '14px !important' }}><Stack direction="row" spacing={1.3} alignItems="center"><Avatar sx={{ bgcolor: 'primary.main', width: 38, height: 38, fontSize: 14 }}>{user.name?.slice(0, 1)}</Avatar><Box minWidth={0}><Typography fontWeight={700} fontSize={13} noWrap>{user.name}</Typography><Typography fontSize={10.5} color="text.secondary">{roles[user.role]}</Typography></Box></Stack></CardContent></Card>
-      <Button fullWidth color="inherit" onClick={onLogout} sx={{ justifyContent: 'flex-start', color: 'text.secondary', gap: 1.2, px: 1.5 }}><LogoutRounded fontSize="small" />تسجيل الخروج</Button>
+    <Box className="drawer-footer">
+      <Box className="drawer-footer-art"><span /><span /><span /><span /></Box>
+      <Typography fontSize={12.5} fontWeight={700}>مخزون منظم، متابعة أوضح.</Typography>
+      <Typography fontSize={11} className="drawer-muted">كل جهاز وكل عقد في مكان واحد.</Typography>
+      <Button fullWidth className="logout-button" onClick={onLogout} sx={{ justifyContent: 'flex-start', gap: 1.2, px: 1.5, mt: 2 }}><LogoutRounded fontSize="small" />تسجيل الخروج</Button>
     </Box>
   </Box>;
-  return <Box sx={{ display: 'flex', minHeight: '100vh' }}>
+  return <Box className="app-shell" sx={{ display: 'flex', minHeight: '100vh' }}>
     <Box component="nav" sx={{ width: { md: drawerWidth }, flexShrink: { md: 0 } }}>
-      <Drawer anchor="right" variant="temporary" open={mobileOpen} onClose={() => setMobileOpen(false)} ModalProps={{ keepMounted: true }} sx={{ display: { xs: 'block', md: 'none' }, '& .MuiDrawer-paper': { width: drawerWidth, border: 0 } }}>{drawer}</Drawer>
-      <Drawer anchor="right" variant="permanent" open sx={{ display: { xs: 'none', md: 'block' }, '& .MuiDrawer-paper': { width: drawerWidth, border: 0 } }}>{drawer}</Drawer>
+      <Drawer anchor="right" variant="temporary" open={mobileOpen} onClose={() => setMobileOpen(false)} ModalProps={{ keepMounted: true }} sx={{ display: { xs: 'block', md: 'none' }, '& .MuiDrawer-paper': { width: Math.min(drawerWidth, 310), border: 0 } }}>{drawer}</Drawer>
+      <Drawer anchor="right" variant="permanent" open sx={{ display: { xs: 'none', md: 'block' }, '& .MuiDrawer-paper': { width: drawerWidth, border: 0, top: 24, right: 24, height: 'calc(100vh - 48px)', borderRadius: '30px 30px 30px 30px' } }}>{drawer}</Drawer>
     </Box>
     <Box component="main" className="app-canvas" sx={{ flexGrow: 1, width: { md: `calc(100% - ${drawerWidth}px)` }, minWidth: 0 }}>
-      <Toolbar sx={{ height: 76, bgcolor: 'rgba(248,250,255,.9)', backdropFilter: 'blur(16px)', borderBottom: '1px solid #E1E8F3', position: 'sticky', top: 0, zIndex: 10, px: { xs: 2, md: 4 } }}>
+      <Toolbar className="topbar" sx={{ height: 76, position: 'sticky', top: 0, zIndex: 10, px: { xs: 2, md: 4 } }}>
         <IconButton aria-label="فتح القائمة" onClick={() => setMobileOpen(true)} sx={{ display: { md: 'none' }, ml: 1 }}><MenuRounded /></IconButton>
         <Typography className="topbar-title" fontWeight={800} fontSize={14}>{current.label}</Typography>
-        <Box sx={{ marginInlineStart: 'auto' }}><Tooltip title="التنبيهات"><IconButton className="action-icon" aria-label={`فتح التنبيهات، ${alertCount} مستحقة`} onClick={() => navigate('/alerts')}><Badge badgeContent={alertCount} color="error" max={99}><NotificationsActiveRounded fontSize="small" /></Badge></IconButton></Tooltip></Box>
+        <Box sx={{ marginInlineStart: 'auto', display: 'flex', alignItems: 'center', gap: 1.4 }}><Typography className="topbar-date" fontSize={11.5}>{new Intl.DateTimeFormat('ar-EG', { weekday: 'long', day: 'numeric', month: 'long' }).format(new Date())}</Typography><Tooltip title="التنبيهات"><IconButton className="action-icon" aria-label={`فتح التنبيهات، ${alertCount} مستحقة`} onClick={() => navigate('/alerts')}><Badge badgeContent={alertCount} color="error" max={99}><NotificationsActiveRounded fontSize="small" /></Badge></IconButton></Tooltip></Box>
       </Toolbar>
-      <Container maxWidth="xl" sx={{ py: { xs: 3, md: 4.5 }, px: { xs: 2, md: 4 } }}>
+      <Container className="page-content" maxWidth="xl" sx={{ py: { xs: 3, md: 4 }, px: { xs: 2, md: 4 } }}>
         <Routes>
           <Route path="/" element={<Dashboard user={user} />} /><Route path="/devices" element={<Devices user={user} />} /><Route path="/devices/:id" element={<DeviceDetails />} />
           <Route path="/rentals" element={<Rentals user={user} />} /><Route path="/alerts" element={<AlertsPage />} />
@@ -163,8 +166,8 @@ function Pager({ page, total, limit = 10, onChange }) {
   const start = (page - 1) * limit + 1;
   return <Box className="pager"><Typography fontSize={12} color="text.secondary">عرض {arNumber.format(start)}–{arNumber.format(Math.min(page * limit, total))} من {arNumber.format(total)}</Typography><Pagination count={pages} page={page} onChange={(_event, value) => onChange(value)} color="primary" shape="rounded" size="small" siblingCount={0} boundaryCount={1} /></Box>;
 }
-function StatCard({ title, value, note, icon: Icon, tint = '#2457D6', pale = '#E4ECFF' }) {
-  return <Card className="stat-card" sx={{ color: tint }}><CardContent sx={{ p: '22px !important' }}><Stack direction="row" justifyContent="space-between" alignItems="flex-start"><Box><Typography fontSize={12.5} fontWeight={700} color="text.secondary" mb={1}>{title}</Typography><Typography variant="h4" color="text.primary" lineHeight={1.1}>{value}</Typography><Typography fontSize={11.5} mt={1.2} color="text.secondary">{note}</Typography></Box><Avatar variant="rounded" sx={{ bgcolor: pale, color: tint, width: 48, height: 48, borderRadius: 3.5, boxShadow: `0 8px 20px ${tint}18` }}><Icon /></Avatar></Stack></CardContent></Card>;
+function StatCard({ title, value, note, icon: Icon, tint = '#34534F', pale = '#E6F0ED', variant = 'plain' }) {
+  return <Card className={`stat-card stat-card--${variant}`} sx={{ '--stat-tint': tint, '--stat-pale': pale }}><CardContent sx={{ p: '22px 24px !important' }}><Stack direction="row" justifyContent="space-between" alignItems="flex-start" gap={1.5}><Box minWidth={0}><Typography className="stat-label" fontSize={12.5} fontWeight={700} mb={1}>{title}</Typography><Typography className="stat-value" variant="h4" lineHeight={1.12}>{value}</Typography><Typography className="stat-note" fontSize={11.5} mt={1.3}>{note}</Typography></Box><Box className="stat-icon"><Icon fontSize="small" /></Box></Stack></CardContent></Card>;
 }
 
 function Dashboard({ user }) {
@@ -173,34 +176,44 @@ function Dashboard({ user }) {
   useEffect(() => { api.dashboard().then(setData); }, []);
   if (!data) return <Loading />;
   const total = data.counts.total || 1;
+  const statusData = [
+    { label: 'متاح', count: data.counts.available || 0, color: '#D3A51C' },
+    { label: 'مؤجّر', count: data.counts.rented || 0, color: '#34534F' },
+    { label: 'في الصيانة', count: data.counts.maintenance || 0, color: '#2AA69D' },
+    { label: 'محجوز', count: data.counts.reserved || 0, color: '#93B2AB' },
+  ];
+  let progress = 0;
+  const donut = data.counts.total ? `conic-gradient(${statusData.map(({ count, color }) => { const from = progress; progress += count / total * 100; return `${color} ${from}% ${progress}%`; }).join(', ')})` : '#E2EDE9';
   return <>
     <PageHeader eyebrow={new Intl.DateTimeFormat('ar-EG', { weekday: 'long', day: 'numeric', month: 'long' }).format(new Date())} title="صباح الخير 👋" subtitle="هذه هي حالة المخزون وعقود الإيجار اليوم." action={user.role !== 'viewer' && <Button variant="contained" startIcon={<AddRounded />} onClick={() => navigate('/devices?add=1')}>إضافة جهاز</Button>} />
-    <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', sm: '1fr 1fr', xl: 'repeat(4, 1fr)' }, gap: 2.2, mb: 3 }}>
-      <StatCard title="إجمالي الأجهزة" value={arNumber.format(data.counts.total)} note="كل أجهزة المخزون" icon={Inventory2Rounded} />
-      <StatCard title="أجهزة متاحة" value={arNumber.format(data.counts.available)} note={`${Math.round(data.counts.available / total * 100)}٪ من المخزون`} icon={DevicesOtherRounded} tint="#386CDE" pale="#E1EBFF" />
-      <StatCard title="أجهزة مؤجّرة" value={arNumber.format(data.counts.rented)} note="لدى العملاء حاليًا" icon={SwapHorizRounded} tint="#5B6EAA" pale="#E9EDFA" />
-      <StatCard title="عقود متأخرة" value={arNumber.format(data.counts.overdue)} note="تحتاج متابعة عاجلة" icon={EventBusyRounded} tint="#B3261E" pale="#FFE2DE" />
+    <Box className="dashboard-highlights">
+      <StatCard title="أجهزة متاحة" value={arNumber.format(data.counts.available)} note={`${Math.round(data.counts.available / total * 100)}٪ من المخزون`} icon={DevicesOtherRounded} variant="gold" />
+      <StatCard title="أجهزة مؤجّرة" value={arNumber.format(data.counts.rented)} note="لدى العملاء حاليًا" icon={SwapHorizRounded} variant="dark" />
+      <StatCard title="إجمالي الأجهزة" value={arNumber.format(data.counts.total)} note="كل أجهزة المخزون" icon={Inventory2Rounded} variant="light" />
+      <StatCard title="عقود متأخرة" value={arNumber.format(data.counts.overdue)} note="تحتاج متابعة عاجلة" icon={EventBusyRounded} tint="#A84C3E" pale="#FBE8E3" />
     </Box>
-    <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', lg: 'minmax(0,1.45fr) minmax(320px,.75fr)' }, gap: 2.4 }}>
-      <Card><CardContent sx={{ p: { xs: 2, md: 3 } }}>
-        <Stack direction="row" justifyContent="space-between" alignItems="center" mb={2.5}><Box><Typography variant="h6">أقرب مواعيد الاسترداد</Typography><Typography variant="caption" color="text.secondary">العقود التي تتطلب متابعة أولًا</Typography></Box><Button size="small" onClick={() => navigate('/alerts')}>عرض الكل</Button></Stack>
-        <Stack spacing={1.4}>{data.expiringSoon.slice(0, 4).map((r) => <RentalAlert key={r._id} rental={r} compact />)}</Stack>
+    <Box className="dashboard-main-grid">
+      <Card className="dashboard-panel"><CardContent sx={{ p: { xs: 2.5, md: 3.2 } }}>
+        <Stack direction="row" justifyContent="space-between" alignItems="center" gap={2} mb={2.5}><Box><Typography variant="h6">أقرب مواعيد الاسترداد</Typography><Typography variant="caption" color="text.secondary">العقود التي تتطلب متابعة أولًا</Typography></Box><Button size="small" variant="text" onClick={() => navigate('/alerts')}>عرض الكل</Button></Stack>
+        {data.expiringSoon.length ? <Stack gap={1.2}>{data.expiringSoon.slice(0, 4).map((r) => <RentalAlert key={r._id} rental={r} compact />)}</Stack> : <Box className="dashboard-no-alerts"><TimelapseRounded /><Typography>لا توجد مواعيد استرداد قريبة حاليًا</Typography></Box>}
       </CardContent></Card>
-      <Stack spacing={2.4}>
-        <Card><CardContent sx={{ p: 3 }}><Typography variant="h6" mb={2}>توزيع حالة الأجهزة</Typography>
-          {[['متاح', data.counts.available, '#386CDE'], ['مؤجّر', data.counts.rented, '#7894DA'], ['في الصيانة', data.counts.maintenance, '#C47700']].map(([label, count, color]) => <Box key={label} mb={2}><Stack direction="row" justifyContent="space-between" mb={.7}><Typography fontSize={13}>{label}</Typography><Typography fontSize={13} fontWeight={800}>{arNumber.format(count)}</Typography></Stack><Box className="progress-track"><Box className="progress-fill" sx={{ width: `${count / total * 100}%`, bgcolor: color }} /></Box></Box>)}
-        </CardContent></Card>
-        <Card sx={{ background: 'linear-gradient(135deg,#173D9B,#2457D6 72%,#5B80E7)', color: '#fff' }}><CardContent sx={{ p: 3 }}><Stack direction="row" justifyContent="space-between"><Box><Typography fontSize={12} sx={{ opacity: .7 }}>قيمة الإيجارات النشطة</Typography><Typography variant="h5" mt={.7}>{money.format(data.financials.activeRentalValue)}</Typography></Box><PaymentsRounded sx={{ opacity: .7 }} /></Stack><Divider sx={{ borderColor: 'rgba(255,255,255,.15)', my: 2 }} /><Typography fontSize={12} sx={{ opacity: .72 }}>التأمينات المحتفظ بها: {money.format(data.financials.depositsHeld)}</Typography></CardContent></Card>
-      </Stack>
+      <Card className="dashboard-panel"><CardContent sx={{ p: { xs: 2.5, md: 3.2 } }}>
+        <Typography variant="h6" mb={.5}>حالة الأجهزة</Typography><Typography variant="caption" color="text.secondary">نظرة سريعة على حركة المخزون</Typography>
+        <Box className="status-bars" role="img" aria-label={statusData.map(({ label, count }) => `${label}: ${count}`).join('، ')}>{statusData.map(({ label, count, color }) => <Box className="status-bar-column" key={label}><Box className="status-bar-track"><Box className="status-bar-fill" sx={{ height: `${data.counts.total ? Math.max(count / total * 100, count ? 9 : 0) : 0}%`, bgcolor: color }} /></Box><Typography fontWeight={800} fontSize={12}>{arNumber.format(count)}</Typography><Typography fontSize={11} color="text.secondary" textAlign="center">{label}</Typography></Box>)}</Box>
+      </CardContent></Card>
+    </Box>
+    <Box className="dashboard-bottom-grid">
+      <Card className="dashboard-panel"><CardContent sx={{ p: { xs: 2.5, md: 3.2 } }}><Typography variant="h6" mb={.5}>توزيع المخزون</Typography><Typography variant="caption" color="text.secondary">حسب حالة الأجهزة الحالية</Typography><Box className="distribution-layout"><Box className="status-donut" role="img" aria-label={statusData.map(({ label, count }) => `${label}: ${count}`).join('، ')} sx={{ background: donut }}><Box className="status-donut-hole"><Typography fontSize={30} fontWeight={800}>{arNumber.format(data.counts.total)}</Typography><Typography fontSize={11} color="text.secondary">جهاز</Typography></Box></Box><Box className="distribution-legend">{statusData.map(({ label, count, color }) => <Box className="legend-row" key={label}><Box className="legend-dot" sx={{ bgcolor: color }} /><Typography fontSize={12.5}>{label}</Typography><Typography fontSize={13} fontWeight={800} sx={{ marginInlineStart: 'auto' }}>{arNumber.format(count)}</Typography></Box>)}</Box></Box></CardContent></Card>
+      <Card className="dashboard-panel financial-panel"><CardContent sx={{ p: { xs: 2.5, md: 3.2 } }}><Stack direction="row" alignItems="flex-start" justifyContent="space-between"><Box><Typography variant="h6">الملخص المالي</Typography><Typography variant="caption" color="text.secondary">العقود النشطة فقط</Typography></Box><Box className="financial-icon"><PaymentsRounded /></Box></Stack><Box className="financial-amount"><Typography fontSize={12} color="text.secondary">قيمة الإيجارات النشطة</Typography><Typography variant="h4" fontWeight={800} mt={.7}>{money.format(data.financials.activeRentalValue)}</Typography></Box><Box className="financial-divider" /><Stack direction="row" alignItems="center" justifyContent="space-between" gap={1}><Typography fontSize={12} color="text.secondary">التأمينات المحتفظ بها</Typography><Typography fontSize={16} fontWeight={800}>{money.format(data.financials.depositsHeld)}</Typography></Stack><Box className="financial-watermark" /></CardContent></Card>
     </Box>
   </>;
 }
 
 function RentalAlert({ rental, compact = false, onReturn, onExtend, onOpen }) {
   const days = daysLeft(rental.endDate); const finished = ['completed', 'cancelled'].includes(rental.status); const overdue = !finished && days < 0;
-  return <Box className="alert-strip" onClick={onOpen} role={onOpen ? 'button' : undefined} tabIndex={onOpen ? 0 : undefined} onKeyDown={onOpen ? (event) => { if (event.key === 'Enter' && event.target === event.currentTarget) onOpen(); } : undefined} sx={{ cursor: onOpen ? 'pointer' : 'default', bgcolor: finished ? '#F3F6FC' : overdue ? '#FFF3F1' : days <= 3 ? '#FFF8EB' : '#F3F6FC', borderColor: finished ? '#E1E8F3' : overdue ? '#FFD4CF' : days <= 3 ? '#F5D9A7' : '#E1E8F3' }}>
+  return <Box className="alert-strip" onClick={onOpen} role={onOpen ? 'button' : undefined} tabIndex={onOpen ? 0 : undefined} onKeyDown={onOpen ? (event) => { if (event.key === 'Enter' && event.target === event.currentTarget) onOpen(); } : undefined} sx={{ cursor: onOpen ? 'pointer' : 'default', bgcolor: finished ? '#F3F8F6' : overdue ? '#FFF2EF' : days <= 3 ? '#FFF9EA' : '#F4F9F7', borderColor: finished ? '#E1EBE7' : overdue ? '#F5D8D1' : days <= 3 ? '#F3E4C5' : '#E1EBE7' }}>
     <Stack direction={{ xs: 'column', sm: 'row' }} alignItems={{ sm: 'center' }} spacing={1.5}>
-      <Avatar variant="rounded" sx={{ bgcolor: overdue ? '#FFE0DC' : '#E4ECFF', color: overdue ? 'error.main' : 'primary.main' }}>{overdue ? <WarningAmberRounded /> : <TimelapseRounded />}</Avatar>
+      <Avatar variant="rounded" sx={{ bgcolor: overdue ? '#FBE3DE' : '#E3EFEB', color: overdue ? 'error.main' : 'primary.main' }}>{overdue ? <WarningAmberRounded /> : <TimelapseRounded />}</Avatar>
       <Box flex={1} minWidth={0}><Typography fontWeight={800} fontSize={14}>{rental.device?.name}</Typography><Typography variant="caption" color="text.secondary">{rental.customer?.name} · {rental.customer?.phone}</Typography></Box>
       <Box textAlign="right"><Typography fontWeight={800} fontSize={13} color={overdue ? 'error.main' : !finished && days <= 3 ? 'warning.main' : 'text.primary'}>{finished ? statusMap[rental.status].label : overdue ? `متأخر ${arNumber.format(Math.abs(days))} يوم` : days === 0 ? 'ينتهي اليوم' : `متبقي ${arNumber.format(days)} يوم`}</Typography><Typography variant="caption" color="text.secondary">{fmtDate(rental.endDate)}</Typography></Box>
       {!compact && (onReturn || onExtend) && <Stack direction="row" spacing={1}>{onExtend && <Button size="small" variant="outlined" onClick={(event) => { event.stopPropagation(); onExtend(rental); }}>تمديد</Button>}{onReturn && <Button size="small" variant="contained" color="success" onClick={(event) => { event.stopPropagation(); onReturn(rental); }}>استلام</Button>}</Stack>}
@@ -292,7 +305,7 @@ function Rentals({ user }) {
   useEffect(() => { load(); }, [page, sort, rentedDate]);
   return <>
     <PageHeader eyebrow="دورة التأجير" title="عقود الإيجار" subtitle="تسليم، متابعة، تمديد واستلام الأجهزة." action={user.role !== 'viewer' && <Button variant="contained" startIcon={<SwapHorizRounded />} onClick={() => setOpen(true)}>تأجير جهاز</Button>} />
-    <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', sm: 'repeat(3,1fr)' }, gap: 2, mb: 2.5 }}><StatCard title="العقود النشطة" value={arNumber.format(summary?.counts.activeRentals || 0)} note="حاليًا لدى العملاء" icon={CalendarMonthRounded} /><StatCard title="متأخرة" value={arNumber.format(summary?.counts.overdue || 0)} note="تحتاج اتصالًا اليوم" icon={EventBusyRounded} tint="#B3261E" pale="#FFE2DE" /><StatCard title="قيمة التأمينات" value={money.format(summary?.financials.depositsHeld || 0)} note="للعقود النشطة" icon={ShieldRounded} tint="#4B63AA" pale="#E7EDFF" /></Box>
+    <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', sm: 'repeat(3,1fr)' }, gap: 2, mb: 2.5 }}><StatCard title="العقود النشطة" value={arNumber.format(summary?.counts.activeRentals || 0)} note="حاليًا لدى العملاء" icon={CalendarMonthRounded} /><StatCard title="متأخرة" value={arNumber.format(summary?.counts.overdue || 0)} note="تحتاج اتصالًا اليوم" icon={EventBusyRounded} tint="#B3261E" pale="#FFE2DE" /><StatCard title="قيمة التأمينات" value={money.format(summary?.financials.depositsHeld || 0)} note="للعقود النشطة" icon={ShieldRounded} tint="#3a5953" pale="#e3f0ec" /></Box>
     {error && <Alert severity="error" sx={{ mb: 2 }} onClose={() => setError('')}>{error}</Alert>}
     <Card><CardContent sx={{ p: { xs: 1.5, md: 2.5 } }}>
       <Stack direction="row" alignItems="center" gap={1.5} flexWrap="wrap" mb={2.3}>
